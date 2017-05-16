@@ -1,0 +1,8 @@
+PROGRAM SOMA;
+VAR Z:INTEGER;
+BEGIN
+ Z<-X;
+LOOP Y;
+  Z<-Z+1;
+ END;
+END;
