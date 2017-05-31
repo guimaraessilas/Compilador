@@ -14,7 +14,6 @@ public class AnalisadorLexico {
 
     private ArrayList<String> tkPalavraReservada = new ArrayList<String>();
     private ArrayList<String> tkDelimitador = new ArrayList<String>();
-    
     private ArrayList<String> listaNomes = new ArrayList<String>();
     private ArrayList<String> listaDelimitadores = new ArrayList<String>();
     private ArrayList<String> listaPalavrasReservadas = new ArrayList<String>();
@@ -25,7 +24,8 @@ public class AnalisadorLexico {
     private Integer nomesInt;
     private boolean frag = false;
     private ArrayList<String> listaDeLexema = new ArrayList<String>();
-
+    private ArrayList<String> tokens = new ArrayList<String>();
+    private String caminho = "/home/silas/Documents/NetBeansProjects/compilador/Compilador/src/compilador/teste1.txt";
     
     public AnalisadorLexico() {
         numeroLinha = 0;
@@ -38,6 +38,7 @@ public class AnalisadorLexico {
         tkPalavraReservada.add("LOOP");
         tkPalavraReservada.add("INTEGER");
         tkPalavraReservada.add("END");
+        tkPalavraReservada.add("GOTO");
 
         tkDelimitador.add(";");
         tkDelimitador.add(":");
@@ -50,7 +51,7 @@ public class AnalisadorLexico {
         tkDelimitador.add(" ");
 
     }
-
+    
     public void exec(String caminho) throws IOException{
         lerArquivo(caminho);
     }
@@ -68,9 +69,9 @@ public class AnalisadorLexico {
                 analiseLexica(linha);
                 linha = lerArq.readLine();
             }
-            analiseCadeia(listaDeLexema);
-            analiseDelimitador(listaDeLexema);
-            
+//            analiseCadeia(listaDeLexema);
+  //          analiseDelimitador(listaDeLexema);
+            fillToken(listaDeLexema);
             arq.close();
         
         } catch (FileNotFoundException ex) {
@@ -122,19 +123,20 @@ public class AnalisadorLexico {
         }
     }
 
-    private void analiseCadeia(ArrayList<String> Listalexema) { 
-        
-        for (String lexema : Listalexema) {
-              if(tkPalavraReservada.contains(lexema)){
-                  listaPalavrasReservadas.add(lexema);
-                  palavrasReservadasInt++;
-              }else if(!tkDelimitador.contains(lexema)){
-                  analiseNome(lexema);
-              }
+    private Boolean analiseCadeia(String pLexema) { 
+
+        if(tkPalavraReservada.contains(pLexema)){
+            listaPalavrasReservadas.add(pLexema);
+            palavrasReservadasInt++;
+            tokens.add("T_"+pLexema);
+            return true;
+        }else if(!tkDelimitador.contains(pLexema)){
+            return analiseNome(pLexema);
         }
+        return false;
     }
     
-    private void analiseNome(String cadeia1) {
+    public Boolean analiseNome(String cadeia1) {
 
         char[] cadeiaVetor = cadeia1.toCharArray();
 
@@ -142,14 +144,14 @@ public class AnalisadorLexico {
             System.out.println("Erro na linha: "+numeroLinha+". Nome invalido. O nome "
                     +cadeia1+ " nao pode iniciar com numero. ");
             
-            return;
+            return false;
         }
         
         if(!Character.isLetter(cadeiaVetor[0]) && cadeiaVetor[0] != '1' && cadeiaVetor.length == 1){
         
             System.out.println("Erro na linha: "+numeroLinha+" ."
                     +cadeia1+" nao e um valor valido");
-            return;
+            return false;
         }
 
         for (char caracterCadeia : cadeiaVetor) {
@@ -157,23 +159,38 @@ public class AnalisadorLexico {
                 System.out.println("Erro na linha: "+numeroLinha+". Nome invalido. "
                     + "O nome: " +cadeia1+" nao pode possuir caracteres minusculos");
             
-                return;
+                return false;
             }
         }
         listaNomes.add(cadeia1);
         nomesInt++;
+        tokens.add("T_NOME");
+        return true;
     }
     
-    private void analiseDelimitador(ArrayList<String> listaLexema) {  // Delimitadores
+    private Boolean analiseDelimitador(String pLexema) {  // Delimitadores
         
-        for (String delimitador : listaLexema) {
-              if(tkDelimitador.contains(delimitador)){
-                  listaDelimitadores.add(delimitador);
-                  delimitadoresInt++;
-              }
+        if(tkDelimitador.contains(pLexema)){
+            listaDelimitadores.add(pLexema);
+            delimitadoresInt++;
+            tokens.add(pLexema);
+            return true;
         }
+        return false;
     }
-
+    
+    private void fillToken(ArrayList<String> listaDeLexema) {
+        
+        for (String listaDeLexema1 : listaDeLexema) {
+            analiseCadeia(listaDeLexema1);
+            analiseDelimitador(listaDeLexema1);
+        
+        }
+        System.out.println(tokens);
+        System.out.println(listaDeLexema);
+    }
+    
+// GET AND SET
     public ArrayList<String> getListaNomes() {
         return listaNomes;
     }
@@ -229,4 +246,15 @@ public class AnalisadorLexico {
     public void setNumeroNomes(Integer nomesInt) {
         this.nomesInt = nomesInt;
     }
+
+    public ArrayList<String> getListaDeLexema() {
+        return listaDeLexema;
+    }
+
+    public void setListaDeLexema(ArrayList<String> listaDeLexema) {
+        this.listaDeLexema = listaDeLexema;
+    }
+
+
+    
 }
