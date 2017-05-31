@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package compilador;
 
 import java.io.BufferedReader;
@@ -16,22 +11,25 @@ import java.util.ArrayList;
  * @author silas
  */
 public class AnalisadorLexico {
+
     private ArrayList<String> tkPalavraReservada = new ArrayList<String>();
     private ArrayList<String> tkDelimitador = new ArrayList<String>();
-    Integer delimitadoresInt;
-    Integer palavrasReservadasInt;
-    Integer numeroLinha;
-    Integer numeroNomes;
     
-    public static void main(String[] args) throws IOException {
-        AnalisadorLexico a = new AnalisadorLexico();
-        a.exec("/home/silas/Documents/NetBeansProjects/Compilador/src/compilador/teste1.txt");
-        
-    }
+    private ArrayList<String> listaNomes = new ArrayList<String>();
+    private ArrayList<String> listaDelimitadores = new ArrayList<String>();
+    private ArrayList<String> listaPalavrasReservadas = new ArrayList<String>();
+    
+    private Integer delimitadoresInt;
+    private Integer palavrasReservadasInt;
+    private Integer numeroLinha;
+    private Integer nomesInt;
+    private boolean frag = false;
+    private ArrayList<String> listaDeLexema = new ArrayList<String>();
+
     
     public AnalisadorLexico() {
         numeroLinha = 0;
-        numeroNomes = 0;
+        nomesInt = 0;
         delimitadoresInt = 0;
         palavrasReservadasInt = 0;
         tkPalavraReservada.add("BEGIN");
@@ -43,7 +41,7 @@ public class AnalisadorLexico {
 
         tkDelimitador.add(";");
         tkDelimitador.add(":");
-        tkDelimitador.add("/+");
+        tkDelimitador.add("+");
         tkDelimitador.add("=");
         tkDelimitador.add("-");
         tkDelimitador.add(" ");
@@ -57,61 +55,87 @@ public class AnalisadorLexico {
         lerArquivo(caminho);
     }
     
-    public void lerArquivo(String caminho) throws IOException{
+    private void lerArquivo(String caminho) throws IOException{
         FileReader arq = null;
         
         try {
             arq = new FileReader(caminho);
             BufferedReader lerArq = new BufferedReader(arq);
             String linha = lerArq.readLine();
-            System.out.println("\n--------------------Arquivo aberto--------------------\n\n");
 
             while (linha != null) {
                 numeroLinha++;
                 analiseLexica(linha);
                 linha = lerArq.readLine();
             }
+            analiseCadeia(listaDeLexema);
+            analiseDelimitador(listaDeLexema);
+            
             arq.close();
         
         } catch (FileNotFoundException ex) {
-            System.out.println("\n--------------Arquivo inexistente--------------\n\n");
+            System.out.println("ERROR: "+ex.getMessage());
         
         } finally {
             try {
                 arq.close();
             } catch (IOException ex) {
-                System.out.println("Shazam carai");
+                System.out.println("ERROR: "+ex.getMessage());
             }
         }
         
     }
     
-    public void analiseLexica(String linha){
+    private void analiseLexica(String linha){
         String[] cadeia= null;
-
-        for (String tkDelimitador1 : tkDelimitador) {
-            cadeia = linha.split(tkDelimitador1);  
-        }   
+        char[] linhaCharArray = linha.trim().toCharArray();
         
-        analiseCadeia(cadeia); 
-        analiseDelimitador(linha);
+        String lexema =  "";
+        int i=0;
+        
+        for (char charInlinhaCharArray : linhaCharArray) {
+            
+            if (charInlinhaCharArray== ';' || charInlinhaCharArray==' ' || charInlinhaCharArray==':' || charInlinhaCharArray=='+' || charInlinhaCharArray=='<') {
+                    
+                if (charInlinhaCharArray == '<'){
+                     frag=true;
+                 }
+
+                String charInlinhaCharArrayString = String.valueOf(charInlinhaCharArray);
+                listaDeLexema.add(lexema);
+                if (!Character.isWhitespace(charInlinhaCharArray) && charInlinhaCharArray!='<') {
+                        listaDeLexema.add(charInlinhaCharArrayString);
+                }
+                lexema = new String();
+
+            }else{
+                
+                if(charInlinhaCharArray!='-'){
+                    lexema += charInlinhaCharArray;
+                }
+
+            }
+            if (frag==true && charInlinhaCharArray=='-'){
+                    listaDeLexema.add("<-");
+                frag=false;       
+            }
+        }
     }
 
-    private void analiseCadeia(String[] cadeia) { // Palavra Reservada e nomes
-        for (String cadeia1 : cadeia) {
-            for (String tkPalavraReservada1 : tkPalavraReservada) {
-                if(!cadeia1.equals(tkPalavraReservada1)){
-                    palavrasReservadasInt++;
-                    System.out.println("Palavra Reservada: "+cadeia1);
-                }else if (cadeia1.contains(tkPalavraReservada1)){
-                    analiseNome(cadeia1);
-                    System.out.println("Nome: "+cadeia1);
-                }
-            }
+    private void analiseCadeia(ArrayList<String> Listalexema) { 
+        
+        for (String lexema : Listalexema) {
+              if(tkPalavraReservada.contains(lexema)){
+                  listaPalavrasReservadas.add(lexema);
+                  palavrasReservadasInt++;
+              }else if(!tkDelimitador.contains(lexema)){
+                  analiseNome(lexema);
+              }
         }
     }
     
     private void analiseNome(String cadeia1) {
+
         char[] cadeiaVetor = cadeia1.toCharArray();
 
         if(!Character.isLetter(cadeiaVetor[0]) && cadeiaVetor.length > 1){
@@ -136,28 +160,73 @@ public class AnalisadorLexico {
                 return;
             }
         }
-
-        numeroNomes++;
+        listaNomes.add(cadeia1);
+        nomesInt++;
     }
     
-    private void analiseDelimitador(String linha) {  // Delimitadores
-        char[] linhaVetor = linha.toCharArray();
+    private void analiseDelimitador(ArrayList<String> listaLexema) {  // Delimitadores
         
-        for (int i = 0; i<linhaVetor.length; i++) {
-            
-            if(String.valueOf(linhaVetor[i]).equals("<") && String.valueOf(linhaVetor[i+1]).equals("-")){
-                delimitadoresInt++;
-                System.out.println("Delimitador lokasso: " + linhaVetor[i] + linhaVetor[i+1]);
-                i+=2;
-            }
-            
-            for (String delimitador1 : tkDelimitador) {
-                if(String.valueOf(linhaVetor[i]).equals(delimitador1)){
-                    delimitadoresInt++;
-                    System.out.println("Delimitadores nao lokasso: "+delimitador1);
-                }
-            }
+        for (String delimitador : listaLexema) {
+              if(tkDelimitador.contains(delimitador)){
+                  listaDelimitadores.add(delimitador);
+                  delimitadoresInt++;
+              }
         }
     }
 
+    public ArrayList<String> getListaNomes() {
+        return listaNomes;
+    }
+
+    public void setListaNomes(ArrayList<String> listaNomes) {
+        this.listaNomes = listaNomes;
+    }
+
+    public ArrayList<String> getListaDelimitadores() {
+        return listaDelimitadores;
+    }
+
+    public void setListaDelimitadores(ArrayList<String> listaDelimitadores) {
+        this.listaDelimitadores = listaDelimitadores;
+    }
+
+    public ArrayList<String> getListaPalavrasReservadas() {
+        return listaPalavrasReservadas;
+    }
+
+    public void setListaPalavrasReservadas(ArrayList<String> listaPalavrasReservadas) {
+        this.listaPalavrasReservadas = listaPalavrasReservadas;
+    }
+
+    public Integer getDelimitadoresInt() {
+        return delimitadoresInt;
+    }
+
+    public void setDelimitadoresInt(Integer delimitadoresInt) {
+        this.delimitadoresInt = delimitadoresInt;
+    }
+
+    public Integer getPalavrasReservadasInt() {
+        return palavrasReservadasInt;
+    }
+
+    public void setPalavrasReservadasInt(Integer palavrasReservadasInt) {
+        this.palavrasReservadasInt = palavrasReservadasInt;
+    }
+
+    public Integer getNumeroLinha() {
+        return numeroLinha;
+    }
+
+    public void setNumeroLinha(Integer numeroLinha) {
+        this.numeroLinha = numeroLinha;
+    }
+
+    public Integer getNumeroNomes() {
+        return nomesInt;
+    }
+
+    public void setNumeroNomes(Integer nomesInt) {
+        this.nomesInt = nomesInt;
+    }
 }
