@@ -69,8 +69,6 @@ public class AnalisadorLexico {
                 analiseLexica(linha);
                 linha = lerArq.readLine();
             }
-//            analiseCadeia(listaDeLexema);
-  //          analiseDelimitador(listaDeLexema);
             fillToken(listaDeLexema);
             arq.close();
         
@@ -128,7 +126,13 @@ public class AnalisadorLexico {
         if(tkPalavraReservada.contains(pLexema)){
             listaPalavrasReservadas.add(pLexema);
             palavrasReservadasInt++;
-            tokens.add("T_"+pLexema);
+            if(pLexema.equals("INTEGER")||pLexema.equals("REAL")){
+                tokens.add("T_TIPO");
+            }else{
+                tokens.add("T_"+pLexema);
+            }
+
+
             return true;
         }else if(!tkDelimitador.contains(pLexema)){
             return analiseNome(pLexema);
@@ -173,7 +177,7 @@ public class AnalisadorLexico {
         if(tkDelimitador.contains(pLexema)){
             listaDelimitadores.add(pLexema);
             delimitadoresInt++;
-            tokens.add(pLexema);
+            tokens.add("T_"+pLexema);
             return true;
         }
         return false;
@@ -186,8 +190,8 @@ public class AnalisadorLexico {
             analiseDelimitador(listaDeLexema1);
         
         }
-        System.out.println(tokens);
         System.out.println(listaDeLexema);
+        System.out.println(tokens);
     }
     
 // GET AND SET
@@ -195,66 +199,35 @@ public class AnalisadorLexico {
         return listaNomes;
     }
 
-    public void setListaNomes(ArrayList<String> listaNomes) {
-        this.listaNomes = listaNomes;
-    }
-
     public ArrayList<String> getListaDelimitadores() {
         return listaDelimitadores;
-    }
-
-    public void setListaDelimitadores(ArrayList<String> listaDelimitadores) {
-        this.listaDelimitadores = listaDelimitadores;
     }
 
     public ArrayList<String> getListaPalavrasReservadas() {
         return listaPalavrasReservadas;
     }
 
-    public void setListaPalavrasReservadas(ArrayList<String> listaPalavrasReservadas) {
-        this.listaPalavrasReservadas = listaPalavrasReservadas;
-    }
-
     public Integer getDelimitadoresInt() {
         return delimitadoresInt;
-    }
-
-    public void setDelimitadoresInt(Integer delimitadoresInt) {
-        this.delimitadoresInt = delimitadoresInt;
     }
 
     public Integer getPalavrasReservadasInt() {
         return palavrasReservadasInt;
     }
 
-    public void setPalavrasReservadasInt(Integer palavrasReservadasInt) {
-        this.palavrasReservadasInt = palavrasReservadasInt;
-    }
-
     public Integer getNumeroLinha() {
         return numeroLinha;
-    }
-
-    public void setNumeroLinha(Integer numeroLinha) {
-        this.numeroLinha = numeroLinha;
     }
 
     public Integer getNumeroNomes() {
         return nomesInt;
     }
 
-    public void setNumeroNomes(Integer nomesInt) {
-        this.nomesInt = nomesInt;
-    }
-
     public ArrayList<String> getListaDeLexema() {
         return listaDeLexema;
     }
 
-    public void setListaDeLexema(ArrayList<String> listaDeLexema) {
-        this.listaDeLexema = listaDeLexema;
-    }
-
-
-    
+    public ArrayList<String> getTokens() {
+        return tokens;
+    }  
 }
