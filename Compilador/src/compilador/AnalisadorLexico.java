@@ -92,9 +92,10 @@ public class AnalisadorLexico {
         String lexema =  "";
         int i=0;
         
-        for (char charInlinhaCharArray : linhaCharArray) {
+        for (Character charInlinhaCharArray : linhaCharArray) {
             
-            if (charInlinhaCharArray== ';' || charInlinhaCharArray==' ' || charInlinhaCharArray==':' || charInlinhaCharArray=='+' || charInlinhaCharArray=='<') {
+            if (charInlinhaCharArray== ';' || charInlinhaCharArray==' ' || charInlinhaCharArray==':' 
+                    || charInlinhaCharArray=='+' || charInlinhaCharArray=='<'){
                     
                 if (charInlinhaCharArray == '<'){
                      frag=true;
@@ -121,8 +122,7 @@ public class AnalisadorLexico {
         }
     }
 
-    private Boolean analiseCadeia(String pLexema) { 
-
+    private Boolean analiseCadeia(String pLexema) {
         if(tkPalavraReservada.contains(pLexema)){
             listaPalavrasReservadas.add(pLexema);
             palavrasReservadasInt++;
@@ -131,7 +131,6 @@ public class AnalisadorLexico {
             }else{
                 tokens.add("T_"+pLexema);
             }
-
 
             return true;
         }else if(!tkDelimitador.contains(pLexema)){
@@ -143,7 +142,6 @@ public class AnalisadorLexico {
     public Boolean analiseNome(String cadeia1) {
 
         char[] cadeiaVetor = cadeia1.toCharArray();
-
         if(!Character.isLetter(cadeiaVetor[0]) && cadeiaVetor.length > 1){
             System.out.println("Erro na linha: "+numeroLinha+". Nome invalido. O nome "
                     +cadeia1+ " nao pode iniciar com numero. ");
@@ -184,14 +182,10 @@ public class AnalisadorLexico {
     }
     
     private void fillToken(ArrayList<String> listaDeLexema) {
-        
         for (String listaDeLexema1 : listaDeLexema) {
             analiseCadeia(listaDeLexema1);
             analiseDelimitador(listaDeLexema1);
-        
         }
-        System.out.println(listaDeLexema);
-        System.out.println(tokens);
     }
     
 // GET AND SET

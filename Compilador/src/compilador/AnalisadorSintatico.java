@@ -14,20 +14,20 @@ public class AnalisadorSintatico {
     private ArrayList<String> listaDeLexemas = new ArrayList<String>();
     private Integer erro = 0;
     private int i = 4;
-
+    
     public AnalisadorSintatico() throws IOException {
       AnalisadorLexico analisadorLexico = new AnalisadorLexico();  
       analisadorLexico.exec(caminho);
       listaDeLexemas = analisadorLexico.getListaDeLexema();
       tokens = analisadorLexico.getTokens();
-      
+        System.out.println(tokens);
+        System.out.println(listaDeLexemas);
     }
 
-    public static void main(String[] args) throws IOException {
-        AnalisadorSintatico a = new AnalisadorSintatico();
+    public void exec() throws IOException {
         
-        if(a.AnaliseToken()){
-            a.AnaliseOrder();
+        if(AnaliseToken()){
+            AnaliseOrder();
         }else{
             System.out.println("Arquivo vazio");
         }
@@ -40,7 +40,7 @@ public class AnalisadorSintatico {
     public void AnaliseOrder(){
         AnaliseProgram();
         AnaliseVar();
-        AnaliseBloco();
+        //AnaliseBloco();
     }
     
     private void AnaliseProgram() {
@@ -52,7 +52,7 @@ public class AnalisadorSintatico {
             System.out.println("Erro: Esperado nome do programa depois de "+listaDeLexemas.get(0));
             erro++;
         }
-        if(tokens.get(2).equals("T_;")){
+        if(!tokens.get(2).equals("T_;")){
             System.out.println("Erro : Delimitador ';' esperado depois de "+listaDeLexemas.get(1));
             erro++;
         }
@@ -67,21 +67,30 @@ public class AnalisadorSintatico {
       
         if(tokens.get(3).equals("T_VAR")){
             while(!tokens.get(i).equals("T_BEGIN")){
-                if(!tokens.get(i).equals(listaVar.get(0))){
-                    System.out.println("Erro: Esperado nome da variavel depois da palavra reservada 'VAR' ");
-                    erro++;
-                    if(!tokens.get(i+1).equals(listaVar.get(1))){
-                        System.out.println("Erro: Esperado o delimitador ':' depois de "+listaDeLexemas.get(i));
-                        erro++;
-                        if(!tokens.get(i+2).equals(listaVar.get(2))){
-                            System.out.println("Erro: Esperado tipo da variavel depois de "+listaDeLexemas.get(i+1));
-                            erro++;
-                            if(!tokens.get(i+2).equals(listaVar.get(3))){
+                if(tokens.get(i).equals(listaVar.get(0))){ 
+                    i++;
+                    if(tokens.get(i).equals(listaVar.get(1))){
+                        i++;
+                        if(tokens.get(i).equals(listaVar.get(2))){
+                            i++;
+                            if(tokens.get(i).equals(listaVar.get(3))){
+                                i++;
+                                
+                            }else{
                                 System.out.println("Erro: Esperado delimitador ; depois de "+listaDeLexemas.get(i+2));
                                 erro++;
                             }   
+                        }else{
+                            System.out.println("Erro: Esperado tipo da variavel depois de "+listaDeLexemas.get(i+1));
+                            erro++;
                         }
+                    }else{
+                        System.out.println("Erro: Esperado o delimitador ':' depois de "+listaDeLexemas.get(i));
+                        erro++;
                     }
+                }else{
+                    System.out.println("Erro: Esperado nome da variavel depois da palavra reservada 'VAR' ");
+                    erro++;
                 }
                 
                 i=+4;
@@ -103,9 +112,83 @@ public class AnalisadorSintatico {
             erro++;
             System.out.println("Erro: faltando o delimitador ';' no fim do programa");
         }
+        
     }
 
-    private void AnaliseComandos() {}
+    private void AnaliseComandos() {
+        while(!tokens.get(i).equals("T_END")){
+            if(tokens.get(i).equals("T_NOME")){
+                AnaliseAtribuicao();
+            }else if(tokens.get(i).equals("T_LOOP")){
+                i++;
+                AnaliseLoop();
+            }else{
+                System.out.println("Erro: q?");
+                erro++;
+            }
     
-    private void AnaliseLoop() {}
-}
+    
+        }
+                
+    }
+
+    private void AnaliseAtribuicao() {
+        if(tokens.get(i).equals("T_NOME")){
+            i++;
+            if(tokens.get(i).equals("T_<-")){
+                i++;
+                if(tokens.get(i).equals("T_NOME") && tokens.get(i++).equals("T_;")){
+                    
+                }else{
+                    AnaliseSoma();
+                }
+            }
+        }
+        
+    }
+
+
+    private void AnaliseSoma() {
+        if(tokens.get(i).equals("T_NOME")){
+            i++;
+            if(tokens.get(i).equals("T_+")){
+                i++;
+                if(tokens.get(i).equals("T_NOME") && (listaDeLexemas.get(i).equals("1"))){
+                    i++;
+                    if(tokens.get(i).equals("T_;")){
+                        i++;
+                    }else{
+                        System.out.println("Erro: esperado delimitador ';' depois de: "+ listaDeLexemas.get(i-1));
+                        erro++;
+                    }
+                }else{
+                      System.out.println("Erro: Valor " + listaDeLexemas.get(i) + "invalido para esta operaçao!!!");
+                      erro++;
+                }
+            }else{
+                System.out.println("Erro: operaçao invalida: operador nao reconhecido!!");
+                erro++;
+            }
+            
+        }else{
+            System.out.println("Erro: qq?");
+            erro++;
+        }
+        
+    }
+    
+    private void AnaliseLoop() {
+
+        if (tokens.get(i).equals("T_NOME")){
+             while(!tokens.get(i).equals("T_END")){
+                 AnaliseAtribuicao();
+                 i++;
+             }
+             i++;
+        }else{
+            System.out.println("Erro: valor invalido depois de 'LOOP'");
+            erro++;
+        }
+    }
+
+ }
