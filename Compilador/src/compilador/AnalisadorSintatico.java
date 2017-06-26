@@ -9,7 +9,7 @@ import java.util.ArrayList;
  */
 
 public class AnalisadorSintatico {
-    private String caminho = "/home/silas/Documents/NetBeansProjects/compilador/Compilador/src/compilador/teste1.txt";
+    private String caminho = "/home/amanda/Documents/Java_projects/Compiladores_ultimo - arquivogit/Compilador/Compilador/src/compilador/teste1.txt";
     private ArrayList<String> tokens = new ArrayList<String>();
     private ArrayList<String> listaDeLexemas = new ArrayList<String>();
     private Integer erro = 0;
@@ -20,8 +20,6 @@ public class AnalisadorSintatico {
       analisadorLexico.exec(caminho);
       listaDeLexemas = analisadorLexico.getListaDeLexema();
       tokens = analisadorLexico.getTokens();
-        System.out.println(tokens);
-        System.out.println(listaDeLexemas);
     }
 
     public void exec() throws IOException {
@@ -40,7 +38,7 @@ public class AnalisadorSintatico {
     public void AnaliseOrder(){
         AnaliseProgram();
         AnaliseVar();
-        //AnaliseBloco();
+        AnaliseBloco();
     }
     
     private void AnaliseProgram() {
@@ -66,8 +64,9 @@ public class AnalisadorSintatico {
       listaVar.add("T_;");
       
         if(tokens.get(3).equals("T_VAR")){
-            while(!tokens.get(i).equals("T_BEGIN")){
-                if(tokens.get(i).equals(listaVar.get(0))){ 
+            //System.out.println(tokens.get(i));
+            while(!tokens.get(i).contains("T_BEGIN")){
+                if(tokens.get(i).equals("T_NOME")){
                     i++;
                     if(tokens.get(i).equals(listaVar.get(1))){
                         i++;
@@ -75,7 +74,6 @@ public class AnalisadorSintatico {
                             i++;
                             if(tokens.get(i).equals(listaVar.get(3))){
                                 i++;
-                                
                             }else{
                                 System.out.println("Erro: Esperado delimitador ; depois de "+listaDeLexemas.get(i+2));
                                 erro++;
@@ -92,13 +90,12 @@ public class AnalisadorSintatico {
                     System.out.println("Erro: Esperado nome da variavel depois da palavra reservada 'VAR' ");
                     erro++;
                 }
-                
-                i=+4;
             }
         }else{
             System.out.println("Erro: Esperado a palavra reservada 'VAR' depois de"+listaDeLexemas.get(2));
             erro++;
         }
+        i++;
     }
 
     private void AnaliseBloco() {
@@ -119,27 +116,23 @@ public class AnalisadorSintatico {
         while(!tokens.get(i).equals("T_END")){
             if(tokens.get(i).equals("T_NOME")){
                 AnaliseAtribuicao();
-            }else if(tokens.get(i).equals("T_LOOP")){
                 i++;
+            }else if(tokens.get(i).equals("T_LOOP")){
                 AnaliseLoop();
-            }else{
-                System.out.println("Erro: q?");
-                erro++;
+                i++;
             }
-    
-    
         }
-                
     }
 
     private void AnaliseAtribuicao() {
+        i++;
         if(tokens.get(i).equals("T_NOME")){
-            i++;
             if(tokens.get(i).equals("T_<-")){
                 i++;
-                if(tokens.get(i).equals("T_NOME") && tokens.get(i++).equals("T_;")){
-                    
+                if(tokens.get(i).equals("T_NOME") && tokens.get(i+1).equals("T_;")){
+                    return;
                 }else{
+                    System.out.println("SOMA erro");
                     AnaliseSoma();
                 }
             }
@@ -171,14 +164,14 @@ public class AnalisadorSintatico {
             }
             
         }else{
-            System.out.println("Erro: qq?");
+            System.out.println("Erro: identificador "+listaDeLexemas.get(i)+" inválido");
             erro++;
         }
         
     }
     
     private void AnaliseLoop() {
-
+        i++;
         if (tokens.get(i).equals("T_NOME")){
              while(!tokens.get(i).equals("T_END")){
                  AnaliseAtribuicao();
@@ -186,9 +179,26 @@ public class AnalisadorSintatico {
              }
              i++;
         }else{
-            System.out.println("Erro: valor invalido depois de 'LOOP'");
+            System.out.println("Erro: valor "+listaDeLexemas.get(i)+" invalido depois de 'LOOP'");
             erro++;
         }
     }
 
- }
+    public ArrayList<String> getTokens() {
+        return tokens;
+    }
+
+    public void setTokens(ArrayList<String> tokens) {
+        this.tokens = tokens;
+    }
+
+    public ArrayList<String> getListaDeLexemas() {
+        return listaDeLexemas;
+    }
+
+    public void setListaDeLexemas(ArrayList<String> listaDeLexemas) {
+        this.listaDeLexemas = listaDeLexemas;
+    }
+
+    
+}

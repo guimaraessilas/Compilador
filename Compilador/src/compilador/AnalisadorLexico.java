@@ -25,7 +25,7 @@ public class AnalisadorLexico {
     private boolean frag = false;
     private ArrayList<String> listaDeLexema = new ArrayList<String>();
     private ArrayList<String> tokens = new ArrayList<String>();
-    private String caminho = "/home/silas/Documents/NetBeansProjects/compilador/Compilador/src/compilador/teste1.txt";
+    private String caminho = "/home/amanda/Documents/Java_projects/Compiladores_ultimo - arquivogit/Compilador/Compilador/src/compilador/teste1.txt";
     
     public AnalisadorLexico() {
         numeroLinha = 0;
@@ -67,6 +67,10 @@ public class AnalisadorLexico {
             while (linha != null) {
                 numeroLinha++;
                 analiseLexica(linha);
+                if(linha.equals("BEGIN")){
+                    listaDeLexema.add("BEGIN");
+                }
+                
                 linha = lerArq.readLine();
             }
             fillToken(listaDeLexema);
